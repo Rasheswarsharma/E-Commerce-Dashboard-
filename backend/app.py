@@ -148,9 +148,12 @@ def create_app(db_url: str = None) -> Flask:
             return jsonify({"success": False, "message": str(e)}), 500
 
     # ── Create tables and seed data ───────────────────────────
-    with app.app_context():
-        db.create_all()
-        _seed_data(db)
+    try:
+        with app.app_context():
+            db.create_all()
+            _seed_data(db)
+    except Exception as e:
+        logger.warning(f"Startup database creation/seeding skipped or failed (likely concurrent worker lock): {e}")
 
     # ── Manual seed command ───────────────────────────────────
     @app.cli.command("seed")
