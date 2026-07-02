@@ -41,11 +41,11 @@ api.interceptors.response.use(
           return api(original)
         } catch {
           localStorage.clear()
-          window.location.href = '/Commerce-Dashboard/login'
+          window.location.href = import.meta.env.BASE_URL + 'login'
         }
       } else {
         localStorage.clear()
-        window.location.href = '/Commerce-Dashboard/login'
+        window.location.href = import.meta.env.BASE_URL + 'login'
       }
     }
     return Promise.reject(error)
