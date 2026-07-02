@@ -150,7 +150,7 @@ def create_app(db_url: str = None) -> Flask:
     # ── Create tables and seed data ───────────────────────────
     with app.app_context():
         db.create_all()
-        _seed_admin(db)
+        _seed_data(db)
 
     # ── Manual seed command ───────────────────────────────────
     @app.cli.command("seed")
@@ -190,9 +190,10 @@ def _seed_data(db):
     # Auto-load sample data if DB is empty
     try:
         if Order.query.count() == 0:
-            _load_sample_data(db)
+            logger.info("Database is empty, auto-populating demo data...")
+            _load_sample_data_manual(db)
     except Exception as e:
-        logger.exception(f"Sample data check failed: {e}")
+        logger.exception(f"Sample data check/load failed: {e}")
 
 def _load_sample_data(db):
     """Load the generated CSV sample data into the database."""
