@@ -1,10 +1,4 @@
 {
-  "services": {
-    "frontend": {
-      "root": "frontend",
-      "framework": "vite"
-    }
-  },
   "cleanUrls": true,
   "rewrites": [
     {
@@ -12,26 +6,44 @@
       "destination": "https://commerce-api-ucbm.onrender.com/api/:path*"
     },
     {
-      "source": "/assets/:path*",
-      "destination": {
-        "type": "service",
-        "service": "frontend"
-      }
+      "source": "/login",
+      "destination": "/index.html"
     },
     {
-      "source": "/favicon.svg",
-      "destination": {
-        "type": "service",
-        "service": "frontend"
-      }
+      "source": "/register",
+      "destination": "/index.html"
     },
     {
-      "source": "/((?!api|assets|favicon.svg).*)",
-      "destination": {
-        "type": "service",
-        "service": "frontend",
-        "path": "/index.html"
-      }
+      "source": "/sales",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/products",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/customers",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/profit",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/regions",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/forecast",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/upload",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/reports",
+      "destination": "/index.html"
     }
   ]
 }
