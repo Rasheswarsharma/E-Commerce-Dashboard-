@@ -100,6 +100,9 @@ export function LoginPage() {
         <p className="text-center text-xs text-slate-500">
           Demo: admin@dashboard.com / Admin@123
         </p>
+        <p className="text-center text-xs text-blue-500 font-bold mt-2">
+          Verify Build: v8a801d7
+        </p>
 
         <div className="divider my-4" />
 
