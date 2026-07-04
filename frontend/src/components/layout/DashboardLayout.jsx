@@ -63,7 +63,7 @@ export default function DashboardLayout() {
               <input
                 type="text"
                 placeholder="Quick search (Press '/' to focus)…"
-                className="w-full pl-9 pr-4 py-1.5 text-sm bg-slate-100 dark:bg-slate-800 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 dark:text-slate-200 placeholder-slate-400"
+                className="w-full pl-9 pr-4 py-1.5 text-sm bg-slate-100 dark:bg-slate-800 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 text-slate-700 dark:text-slate-200 placeholder-slate-400"
               />
             </div>
           </div>
@@ -77,7 +77,7 @@ export default function DashboardLayout() {
 
             <button className="relative p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 notification-btn" title="Notifications">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-teal-600 rounded-full" />
             </button>
           </div>
         </header>
@@ -92,7 +92,7 @@ export default function DashboardLayout() {
       {showScrollTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-6 right-6 p-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg z-50 transition-all duration-300 transform hover:scale-110 active:scale-95 animate-fade-in cursor-pointer border-0"
+          className="fixed bottom-6 right-6 p-3 rounded-full bg-teal-700 hover:bg-teal-800 text-white shadow-lg z-50 transition-all duration-300 transform hover:scale-110 active:scale-95 animate-fade-in cursor-pointer border-0"
           title="Scroll to Top"
         >
           <ChevronUp className="w-5 h-5" />

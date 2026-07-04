@@ -51,7 +51,7 @@ function AnimatedNumber({ value, format }) {
 // ── KPI Card ──────────────────────────────────────────────────
 export function KPICard({ title, value, format = 'currency', growth, icon: Icon, color = 'blue', loading, sparkData }) {
   const colors = {
-    blue:   { bg: 'bg-blue-50 dark:bg-blue-900/20',   icon: 'text-blue-600 dark:text-blue-400' },
+    blue:   { bg: 'bg-teal-50 dark:bg-teal-950/20',   icon: 'text-teal-700 dark:text-teal-400' },
     green:  { bg: 'bg-emerald-50 dark:bg-emerald-900/20', icon: 'text-emerald-600 dark:text-emerald-400' },
     amber:  { bg: 'bg-amber-50 dark:bg-amber-900/20',  icon: 'text-amber-600 dark:text-amber-400' },
     purple: { bg: 'bg-purple-50 dark:bg-purple-900/20', icon: 'text-purple-600 dark:text-purple-400' },
@@ -94,8 +94,8 @@ export function KPICard({ title, value, format = 'currency', growth, icon: Icon,
                 data={sparkData}
                 color={
                   {
-                    blue: '#3b82f6', green: '#10b981', amber: '#f59e0b', purple: '#8b5cf6', red: '#ef4444', cyan: '#06b6d4'
-                  }[color] || '#3b82f6'
+                    blue: '#0d9488', green: '#10b981', amber: '#f59e0b', purple: '#8b5cf6', red: '#ef4444', cyan: '#06b6d4'
+                  }[color] || '#0d9488'
                 }
               />
             )}
@@ -248,7 +248,7 @@ export function FilterBar({ filters, update, filterOptions, showPeriod = false }
                 className={cx(
                   'px-3 py-1.5 text-xs font-medium transition-colors',
                   filters.period === p.value
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-teal-700 text-white'
                     : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                 )}
               >
@@ -332,7 +332,7 @@ export function DataTable({ columns, rows, loading, emptyMessage = 'No data' }) 
               placeholder="Search table..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 dark:text-slate-200 placeholder-slate-400 transition"
+              className="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 text-slate-700 dark:text-slate-200 placeholder-slate-400 transition"
             />
           </div>
         </div>
@@ -359,7 +359,7 @@ export function DataTable({ columns, rows, loading, emptyMessage = 'No data' }) 
                       <div className={cx('flex items-center gap-1.5', col.align === 'right' ? 'justify-end' : 'justify-start')}>
                         <span>{col.label}</span>
                         {isSorted ? (
-                          sortConfig.direction === 'asc' ? <ChevronUp className="w-3.5 h-3.5 text-blue-500" /> : <ChevronDown className="w-3.5 h-3.5 text-blue-500" />
+                          sortConfig.direction === 'asc' ? <ChevronUp className="w-3.5 h-3.5 text-teal-600" /> : <ChevronDown className="w-3.5 h-3.5 text-teal-600" />
                         ) : (
                           <ChevronDown className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 opacity-20 hover:opacity-100 transition-opacity" />
                         )}

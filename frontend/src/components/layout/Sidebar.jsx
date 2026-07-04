@@ -37,7 +37,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     >
       {/* Logo */}
       <div className="flex items-center h-16 px-4 border-b border-slate-200 dark:border-slate-700 gap-3">
-        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-teal-700 flex items-center justify-center">
           <BarChart2 className="w-4 h-4 text-white" />
         </div>
         {!collapsed && (
@@ -67,7 +67,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
                 collapsed && 'justify-center',
                 isActive
-                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
+                  ? 'bg-teal-50 dark:bg-teal-950/20 text-teal-800 dark:text-teal-400'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
               )
             }
@@ -99,7 +99,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         {/* User */}
         {!collapsed && user && (
           <div className="flex items-center gap-2 px-3 py-2">
-            <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+            <div className="w-7 h-7 rounded-full bg-teal-700 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
               {user.full_name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
