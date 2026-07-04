@@ -1,6 +1,52 @@
-import { TrendingUp, TrendingDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { TrendingUp, TrendingDown, Search, ChevronDown, ChevronUp } from 'lucide-react'
 import { fmt, cx } from '../../utils/helpers'
 import { Sparkline } from '../charts/Charts'
+
+// Helper component for animated number counter
+function AnimatedNumber({ value, format }) {
+  const [display, setDisplay] = useState(0)
+
+  useEffect(() => {
+    if (typeof value !== 'number') {
+      setDisplay(value)
+      return
+    }
+    const start = 0
+    const end = value
+    if (start === end) {
+      setDisplay(end)
+      return
+    }
+
+    const duration = 800 // ms
+    const startTime = performance.now()
+    let animationFrameId
+
+    const updateNumber = (now) => {
+      const elapsed = now - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const easeProgress = progress * (2 - progress) // easeOutQuad
+      const current = Math.floor(start + (end - start) * easeProgress)
+      setDisplay(current)
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(updateNumber)
+      } else {
+        setDisplay(end)
+      }
+    }
+
+    animationFrameId = requestAnimationFrame(updateNumber)
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [value])
+
+  if (typeof value !== 'number') return value
+  if (format === 'currency')  return fmt.currency(display, true)
+  if (format === 'number')    return fmt.number(display, true)
+  if (format === 'percent')   return fmt.percent(display)
+  return display
+}
 
 // ── KPI Card ──────────────────────────────────────────────────
 export function KPICard({ title, value, format = 'currency', growth, icon: Icon, color = 'blue', loading, sparkData }) {
@@ -16,6 +62,9 @@ export function KPICard({ title, value, format = 'currency', growth, icon: Icon,
 
   const displayValue = () => {
     if (loading) return null
+    if (typeof value === 'number') {
+      return <AnimatedNumber value={value} format={format} />
+    }
     if (format === 'currency')  return fmt.currency(value, true)
     if (format === 'number')    return fmt.number(value, true)
     if (format === 'percent')   return fmt.percent(value)
@@ -39,7 +88,7 @@ export function KPICard({ title, value, format = 'currency', growth, icon: Icon,
         ? <div className="skeleton h-8 w-32 mt-1" />
         : (
           <div className="flex items-center gap-3 mt-1">
-            <p className="kpi-value" data-count={typeof value === 'number' ? value : ''}>{displayValue()}</p>
+            <div className="kpi-value">{displayValue()}</div>
             {sparkData && (
               <Sparkline
                 data={sparkData}
@@ -215,6 +264,9 @@ export function FilterBar({ filters, update, filterOptions, showPeriod = false }
 
 // ── Data table ────────────────────────────────────────────────
 export function DataTable({ columns, rows, loading, emptyMessage = 'No data' }) {
+  const [search, setSearch] = useState('')
+  const [sortConfig, setSortConfig] = useState(null)
+
   if (loading) {
     return (
       <div className="space-y-2">
@@ -225,47 +277,119 @@ export function DataTable({ columns, rows, loading, emptyMessage = 'No data' }) 
     )
   }
 
-  if (!rows?.length) {
-    return <p className="text-sm text-slate-400 text-center py-8">{emptyMessage}</p>
+  const handleSort = (key) => {
+    let direction = 'asc'
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
+  }
+
+  // 1. Search filter
+  const filtered = (rows || []).filter(row => {
+    if (!search) return true
+    return Object.keys(row).some(k => {
+      const val = row[k]
+      if (val === null || val === undefined) return false
+      return String(val).toLowerCase().includes(search.toLowerCase())
+    })
+  })
+
+  // 2. Sorting
+  const sorted = [...filtered]
+  if (sortConfig !== null) {
+    sorted.sort((a, b) => {
+      let valA = a[sortConfig.key]
+      let valB = b[sortConfig.key]
+
+      if (typeof valA === 'string' && valA.startsWith('₹')) {
+        valA = Number(valA.replace(/[₹,]/g, ''))
+      }
+      if (typeof valB === 'string' && valB.startsWith('₹')) {
+        valB = Number(valB.replace(/[₹,]/g, ''))
+      }
+
+      if (!isNaN(Number(valA)) && !isNaN(Number(valB))) {
+        valA = Number(valA)
+        valB = Number(valB)
+      }
+
+      if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1
+      if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1
+      return 0
+    })
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-slate-100 dark:border-slate-700">
-            {columns.map(col => (
-              <th
-                key={col.key}
-                className={cx(
-                  'pb-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide',
-                  col.align === 'right' ? 'text-right' : 'text-left'
-                )}
-              >
-                {col.label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-          {rows.map((row, i) => (
-            <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-              {columns.map(col => (
-                <td
-                  key={col.key}
-                  className={cx(
-                    'py-2.5 text-slate-700 dark:text-slate-300',
-                    col.align === 'right' && 'text-right',
-                    col.className
-                  )}
-                >
-                  {col.render ? col.render(row[col.key], row) : row[col.key]}
-                </td>
+    <div className="space-y-3">
+      {/* Search Input */}
+      {rows && rows.length > 0 && (
+        <div className="flex justify-end">
+          <div className="relative w-full max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search table..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 dark:text-slate-200 placeholder-slate-400 transition"
+            />
+          </div>
+        </div>
+      )}
+
+      {sorted.length === 0 ? (
+        <p className="text-sm text-slate-400 text-center py-8">{emptyMessage}</p>
+      ) : (
+        <div className="overflow-x-auto rounded-lg border border-slate-100 dark:border-slate-800">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30">
+                {columns.map(col => {
+                  const isSorted = sortConfig && sortConfig.key === col.key
+                  return (
+                    <th
+                      key={col.key}
+                      onClick={() => handleSort(col.key)}
+                      className={cx(
+                        'pb-2.5 pt-3 px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition-colors select-none',
+                        col.align === 'right' ? 'text-right' : 'text-left'
+                      )}
+                    >
+                      <div className={cx('flex items-center gap-1.5', col.align === 'right' ? 'justify-end' : 'justify-start')}>
+                        <span>{col.label}</span>
+                        {isSorted ? (
+                          sortConfig.direction === 'asc' ? <ChevronUp className="w-3.5 h-3.5 text-blue-500" /> : <ChevronDown className="w-3.5 h-3.5 text-blue-500" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 opacity-20 hover:opacity-100 transition-opacity" />
+                        )}
+                      </div>
+                    </th>
+                  )
+                })}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {sorted.map((row, i) => (
+                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  {columns.map(col => (
+                    <td
+                      key={col.key}
+                      className={cx(
+                        'py-3 px-3 text-slate-700 dark:text-slate-300 font-medium',
+                        col.align === 'right' && 'text-right',
+                        col.className
+                      )}
+                    >
+                      {col.render ? col.render(row[col.key], row) : row[col.key]}
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }
