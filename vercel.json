@@ -1,49 +1,20 @@
 {
-  "cleanUrls": true,
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "https://commerce-api-ucbm.onrender.com/api/:path*"
+      "src": "/api/(.*)",
+      "dest": "https://commerce-api-ucbm.onrender.com/api/$1"
     },
     {
-      "source": "/login",
-      "destination": "/index.html"
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
     },
     {
-      "source": "/register",
-      "destination": "/index.html"
+      "src": "/favicon.svg",
+      "dest": "/favicon.svg"
     },
     {
-      "source": "/sales",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/products",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/customers",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/profit",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/regions",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/forecast",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/upload",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/reports",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
