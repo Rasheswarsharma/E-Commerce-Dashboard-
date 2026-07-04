@@ -268,7 +268,7 @@ def _load_sample_data_manual(db):
                 cust = Customer(
                     customer_id=customer_id,
                     customer_name=f"Customer {i}",
-                    segment="Regular",
+                    segment="New",
                 )
                 db.session.add(cust)
                 db.session.flush()
