@@ -33,7 +33,7 @@ if __name__ == "__main__":
     print(f"  DB   : {os.getenv('DATABASE_URL', 'SQLite (demo)')}")
     print(f"  Workers: {workers}")
     print("=" * 56)
-    print("  Default login: admin@dashboard.com / Admin@123")
+    print("  Default login: test@dashboard.com / Admin@123")
     print("  Health check: GET /api/health")
     print("=" * 56)
     print()

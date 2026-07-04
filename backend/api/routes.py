@@ -105,6 +105,8 @@ def register():
 @auth_bp.route("/login", methods=["POST"])
 def login():
     try:
+        from app import _seed_admin
+        _seed_admin(db)
         from models.models import Order
         if Order.query.count() == 0:
             logger.info("Database is empty, auto-seeding demo data on login...")
@@ -266,7 +268,8 @@ def list_batches():
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
 
-    q = UploadBatch.query.order_by(UploadBatch.created_at.desc())
+    uid = get_jwt_identity()
+    q = UploadBatch.query.filter_by(uploaded_by=uid).order_by(UploadBatch.created_at.desc())
     total = q.count()
     batches = q.offset((page - 1) * per_page).limit(per_page).all()
 
@@ -295,19 +298,20 @@ def dashboard():
         generate_insights, get_filter_options
     )
 
+    uid = get_jwt_identity()
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
     category = request.args.get("category")
     region = request.args.get("region")
 
     try:
-        kpis = get_kpis(start_date, end_date, category, region)
-        sales_trend = get_sales_trend("monthly", start_date, end_date, category, region)
-        product_data = get_product_analytics(10, "revenue", start_date, end_date)
-        customer_data = get_customer_analytics(start_date, end_date)
-        regional_data = get_regional_analytics(start_date, end_date)
+        kpis = get_kpis(start_date, end_date, category, region, user_id=uid)
+        sales_trend = get_sales_trend("monthly", start_date, end_date, category, region, user_id=uid)
+        product_data = get_product_analytics(10, "revenue", start_date, end_date, user_id=uid)
+        customer_data = get_customer_analytics(start_date, end_date, user_id=uid)
+        regional_data = get_regional_analytics(start_date, end_date, user_id=uid)
         insights = generate_insights(kpis, sales_trend, product_data, regional_data)
-        filters = get_filter_options()
+        filters = get_filter_options(user_id=uid)
 
         return success({
             "kpis": kpis,
@@ -335,6 +339,7 @@ sales_bp = Blueprint("sales", __name__, url_prefix="/api/sales")
 def sales():
     from services.analytics_service import get_sales_trend
 
+    uid = get_jwt_identity()
     period = request.args.get("period", "monthly")
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
@@ -342,7 +347,7 @@ def sales():
     region = request.args.get("region")
 
     try:
-        trend = get_sales_trend(period, start_date, end_date, category, region)
+        trend = get_sales_trend(period, start_date, end_date, category, region, user_id=uid)
         return success(trend)
     except Exception as e:
         return error(str(e), 500)
@@ -360,13 +365,14 @@ products_bp = Blueprint("products", __name__, url_prefix="/api/products")
 def products():
     from services.analytics_service import get_product_analytics
 
+    uid = get_jwt_identity()
     limit = request.args.get("limit", 10, type=int)
     sort_by = request.args.get("sort_by", "revenue")
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
     try:
-        data = get_product_analytics(limit, sort_by, start_date, end_date)
+        data = get_product_analytics(limit, sort_by, start_date, end_date, user_id=uid)
         return success(data)
     except Exception as e:
         return error(str(e), 500)
@@ -384,11 +390,12 @@ customers_bp = Blueprint("customers", __name__, url_prefix="/api/customers")
 def customers():
     from services.analytics_service import get_customer_analytics
 
+    uid = get_jwt_identity()
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
     try:
-        data = get_customer_analytics(start_date, end_date)
+        data = get_customer_analytics(start_date, end_date, user_id=uid)
         return success(data)
     except Exception as e:
         return error(str(e), 500)
@@ -406,11 +413,12 @@ profit_bp = Blueprint("profit", __name__, url_prefix="/api/profit")
 def profit():
     from services.analytics_service import get_profit_analytics
 
+    uid = get_jwt_identity()
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
     try:
-        data = get_profit_analytics(start_date, end_date)
+        data = get_profit_analytics(start_date, end_date, user_id=uid)
         return success(data)
     except Exception as e:
         return error(str(e), 500)
@@ -428,11 +436,12 @@ regions_bp = Blueprint("regions", __name__, url_prefix="/api/regions")
 def regions():
     from services.analytics_service import get_regional_analytics
 
+    uid = get_jwt_identity()
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
     try:
-        data = get_regional_analytics(start_date, end_date)
+        data = get_regional_analytics(start_date, end_date, user_id=uid)
         return success(data)
     except Exception as e:
         return error(str(e), 500)
@@ -450,10 +459,11 @@ forecast_bp = Blueprint("forecast", __name__, url_prefix="/api/forecast")
 def forecast():
     from services.analytics_service import get_forecast
 
+    uid = get_jwt_identity()
     days = request.args.get("days", 30, type=int)
 
     try:
-        data = get_forecast(days)
+        data = get_forecast(days, user_id=uid)
         return success(data)
     except Exception as e:
         return error(str(e), 500)
@@ -479,10 +489,10 @@ def download_excel():
     end_date = request.args.get("end_date")
 
     try:
-        kpis = get_kpis(start_date, end_date)
-        sales = get_sales_trend("monthly", start_date, end_date)
-        products = get_product_analytics(20, "revenue", start_date, end_date)
-        customers = get_customer_analytics(start_date, end_date)
+        kpis = get_kpis(start_date, end_date, user_id=uid)
+        sales = get_sales_trend("monthly", start_date, end_date, user_id=uid)
+        products = get_product_analytics(20, "revenue", start_date, end_date, user_id=uid)
+        customers = get_customer_analytics(start_date, end_date, user_id=uid)
 
         excel_bytes = generate_excel_report(kpis, sales, products, customers)
 
@@ -520,10 +530,10 @@ def download_pdf():
     end_date = request.args.get("end_date")
 
     try:
-        kpis = get_kpis(start_date, end_date)
-        sales = get_sales_trend("monthly", start_date, end_date)
-        products = get_product_analytics(10, "revenue", start_date, end_date)
-        regional = get_regional_analytics(start_date, end_date)
+        kpis = get_kpis(start_date, end_date, user_id=uid)
+        sales = get_sales_trend("monthly", start_date, end_date, user_id=uid)
+        products = get_product_analytics(10, "revenue", start_date, end_date, user_id=uid)
+        regional = get_regional_analytics(start_date, end_date, user_id=uid)
         insights = generate_insights(kpis, sales, products, regional)
 
         pdf_bytes = generate_pdf_report(kpis, sales, products, insights)
@@ -567,7 +577,8 @@ filters_bp = Blueprint("filters", __name__, url_prefix="/api/filters")
 @jwt_required()
 def get_filters():
     from services.analytics_service import get_filter_options
+    uid = get_jwt_identity()
     try:
-        return success(get_filter_options())
+        return success(get_filter_options(user_id=uid))
     except Exception as e:
         return error(str(e), 500)

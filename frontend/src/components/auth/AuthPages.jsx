@@ -1,27 +1,21 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { BarChart2, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAuth } from '../../store/AuthContext'
 import toast from 'react-hot-toast'
 
 function AuthLayout({ children, title, subtitle }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-      {/* Background grid */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=60 height=60 viewBox=0 0 60 60 xmlns=http://www.w3.org/2000/svg%3E%3Cg fill=none fill-rule=evenodd%3E%3Cg fill=%23ffffff opacity=.03%3E%3Cpath d=M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40" />
-
-      <div className="relative w-full max-w-md">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center mb-3 shadow-lg shadow-blue-500/30">
-            <BarChart2 className="w-6 h-6 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-teal-950/40 to-slate-950 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl p-6 md:p-8">
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-12 h-12 rounded-2xl bg-teal-700 flex items-center justify-center mb-3 shadow-lg shadow-teal-500/30">
+            <span className="text-xl font-bold text-white">C</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">{title}</h1>
-          <p className="text-slate-400 text-sm mt-1">{subtitle}</p>
+          <h2 className="text-xl font-bold text-white">{title}</h2>
+          <p className="text-sm text-slate-400 mt-1">{subtitle}</p>
         </div>
-
-        {/* Card */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+        <div className="space-y-4">
           {children}
         </div>
       </div>
@@ -33,7 +27,7 @@ function AuthLayout({ children, title, subtitle }) {
 export function LoginPage() {
   const { login }  = useAuth()
   const navigate   = useNavigate()
-  const [form, setForm]     = useState({ email: 'admin@dashboard.com', password: 'Admin@123' })
+  const [form, setForm]     = useState({ email: 'test@dashboard.com', password: 'Admin@123' })
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -60,7 +54,7 @@ export function LoginPage() {
             type="email"
             value={form.email}
             onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-            className="w-full px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent"
             placeholder="you@company.com"
             required
           />
@@ -73,7 +67,7 @@ export function LoginPage() {
               type={showPw ? 'text' : 'password'}
               value={form.password}
               onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-              className="w-full px-3 py-2.5 pr-10 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2.5 pr-10 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent"
               placeholder="••••••••"
               required
             />
@@ -90,7 +84,7 @@ export function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+          className="w-full py-2.5 bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           {loading ? 'Signing in…' : 'Sign in'}
@@ -98,9 +92,9 @@ export function LoginPage() {
 
         {/* Demo credentials hint */}
         <p className="text-center text-xs text-slate-500">
-          Demo: admin@dashboard.com / Admin@123
+          Demo: test@dashboard.com / Admin@123
         </p>
-        <p className="text-center text-xs text-blue-500 font-bold mt-2">
+        <p className="text-center text-xs text-teal-500 font-bold mt-2">
           Verify Build: v8a801d7
         </p>
 
@@ -108,7 +102,7 @@ export function LoginPage() {
 
         <p className="text-center text-sm text-slate-400">
           Don't have an account?{' '}
-          <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium">
+          <Link to="/register" className="text-teal-400 hover:text-teal-300 font-medium">
             Register
           </Link>
         </p>
@@ -146,7 +140,7 @@ export function RegisterPage() {
   const field = (key) => ({
     value: form[key],
     onChange: e => setForm(f => ({ ...f, [key]: e.target.value })),
-    className: 'w-full px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+    className: 'w-full px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent',
   })
 
   return (
@@ -177,7 +171,7 @@ export function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+          className="w-full py-2.5 bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           {loading ? 'Creating account…' : 'Create Account'}
@@ -185,7 +179,7 @@ export function RegisterPage() {
 
         <p className="text-center text-sm text-slate-400">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium">Sign in</Link>
+          <Link to="/login" className="text-teal-400 hover:text-teal-300 font-medium">Sign in</Link>
         </p>
       </form>
     </AuthLayout>

@@ -47,7 +47,7 @@ def check_health(host="127.0.0.1", port=5000, timeout=5, retries=3):
     print("  - Manual: python run.py")
     return False
 
-def check_login(host="127.0.0.1", port=5000, email="admin@dashboard.com", password="Admin@123"):
+def check_login(host="127.0.0.1", port=5000, email="test@dashboard.com", password="Admin@123"):
     """Test login endpoint."""
     base_url = f"http://{host}:{port}"
     login_url = urljoin(base_url, "/api/auth/login")

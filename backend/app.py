@@ -166,29 +166,29 @@ def create_app(db_url: str = None) -> Flask:
     return app
 
 def _seed_data(db):
-    """Seed admin user and sample data if tables are empty."""
+    """Seed default test user and sample data if tables are empty."""
     from models.models import User, Order
 
-    # Admin user - wrapped to handle gunicorn worker race conditions
+    # Test user - wrapped to handle gunicorn worker race conditions
     try:
-        if not User.query.filter_by(email="admin@dashboard.com").first():
-            admin = User(
-                email="admin@dashboard.com",
+        if not User.query.filter_by(email="test@dashboard.com").first():
+            test_user = User(
+                email="test@dashboard.com",
                 password_hash=generate_password_hash("Admin@123"),
-                full_name="Admin User",
+                full_name="Test User",
                 role="admin",
             )
-            db.session.add(admin)
+            db.session.add(test_user)
             db.session.commit()
-            logger.info("Created default admin user: admin@dashboard.com / Admin@123")
+            logger.info("Created default test user: test@dashboard.com / Admin@123")
         else:
-            logger.info("Admin user already exists, skipping creation")
+            logger.info("Test user already exists, skipping creation")
     except IntegrityError:
         db.session.rollback()
-        logger.info("Admin user already exists - caught IntegrityError from concurrent worker")
+        logger.info("Test user already exists - caught IntegrityError from concurrent worker")
     except Exception as e:
         db.session.rollback()
-        logger.exception(f"Failed to seed admin user: {e}")
+        logger.exception(f"Failed to seed test user: {e}")
 
     # Auto-load sample data if DB is empty
     try:
@@ -219,8 +219,8 @@ def _load_sample_data(db):
         df = load_file(csv_path)
         cleaned_df, _ = clean_dataframe(df)
 
-        admin = User.query.filter_by(email="admin@dashboard.com").first()
-        result = import_to_db(cleaned_df, "BATCH-SAMPLE", admin.id if admin else 1)
+        test_user = User.query.filter_by(email="test@dashboard.com").first()
+        result = import_to_db(cleaned_df, "BATCH-SAMPLE", test_user.id if test_user else 1)
         logger.info(f"Sample data loaded: {result['imported']} orders imported")
     except Exception as e:
         logger.exception(f"Sample data load failed: {e}")
@@ -229,10 +229,26 @@ def _load_sample_data_manual(db):
     """Create demo data directly in database without CSV."""
     from datetime import timedelta
     import random
-    from models.models import Category, Region, Customer, Product, Order
+    from models.models import Category, Region, Customer, Product, Order, UploadBatch, User
 
     logger.info("Creating demo data...")
     try:
+        # Create UploadBatch record for DEMO-DATA owned by test user
+        existing_batch = UploadBatch.query.filter_by(batch_id="DEMO-DATA").first()
+        if not existing_batch:
+            test_user = User.query.filter_by(email="test@dashboard.com").first()
+            test_user_id = test_user.id if test_user else 1
+            batch = UploadBatch(
+                batch_id="DEMO-DATA",
+                file_name="sample_commerce_data.csv",
+                file_size=0,
+                total_rows=500,
+                imported_rows=500,
+                status="completed",
+                uploaded_by=test_user_id
+            )
+            db.session.add(batch)
+            db.session.flush()
         # Categories
         categories = {}
         for name in ["Electronics", "Clothing", "Books", "Sports"]:
@@ -336,27 +352,27 @@ def _load_sample_data_manual(db):
         logger.exception(f"Failed creating demo data: {e}")
 
 def _seed_admin(db):
-    """Seed default admin user if it does not exist."""
+    """Seed default test user if it does not exist."""
     from models.models import User
     from werkzeug.security import generate_password_hash
     from sqlalchemy.exc import IntegrityError
     try:
-        if not User.query.filter_by(email="admin@dashboard.com").first():
-            admin = User(
-                email="admin@dashboard.com",
+        if not User.query.filter_by(email="test@dashboard.com").first():
+            test_user = User(
+                email="test@dashboard.com",
                 password_hash=generate_password_hash("Admin@123"),
-                full_name="Admin User",
+                full_name="Test User",
                 role="admin",
             )
-            db.session.add(admin)
+            db.session.add(test_user)
             db.session.commit()
-            logger.info("Created default admin user: admin@dashboard.com / Admin@123")
+            logger.info("Created default test user: test@dashboard.com / Admin@123")
     except IntegrityError:
         db.session.rollback()
-        logger.info("Admin user already exists - caught IntegrityError from concurrent worker")
+        logger.info("Test user already exists - caught IntegrityError from concurrent worker")
     except Exception as e:
         db.session.rollback()
-        logger.exception(f"Failed to seed admin user: {e}")
+        logger.exception(f"Failed to seed test user: {e}")
 
 if __name__ == "__main__":
     app = create_app()
