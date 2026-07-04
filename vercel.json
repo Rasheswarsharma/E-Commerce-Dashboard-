@@ -12,10 +12,25 @@
       "destination": "https://commerce-api-ucbm.onrender.com/api/:path*"
     },
     {
-      "source": "/(.*)",
+      "source": "/assets/:path*",
       "destination": {
         "type": "service",
         "service": "frontend"
+      }
+    },
+    {
+      "source": "/favicon.svg",
+      "destination": {
+        "type": "service",
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/((?!api|assets|favicon.svg).*)",
+      "destination": {
+        "type": "service",
+        "service": "frontend",
+        "path": "/index.html"
       }
     }
   ]
