@@ -104,6 +104,16 @@ def register():
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
+    try:
+        from models.models import Order
+        if Order.query.count() == 0:
+            logger.info("Database is empty, auto-seeding demo data on login...")
+            from app import _load_sample_data_manual
+            _load_sample_data_manual(db)
+    except Exception as e:
+        db.session.rollback()
+        logger.warning(f"On-demand seeding failed: {e}")
+
     data = request.get_json(silent=True) or {}
     email = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
