@@ -6,7 +6,7 @@
       "destination": "https://commerce-api-ucbm.onrender.com/api/:path*"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/:path*",
       "destination": "/index.html"
     }
   ]
