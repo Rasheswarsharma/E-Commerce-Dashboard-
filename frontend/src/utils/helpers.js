@@ -62,13 +62,13 @@ export const downloadBlob = (blob, filename) => {
 
 // ── Chart colors ──────────────────────────────────────────────
 export const CHART_COLORS = [
-  '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
+  '#3b82f6', '#6366f1', '#f59e0b', '#f97316',
   '#8b5cf6', '#06b6d4', '#f97316', '#ec4899',
 ]
 
 export const CATEGORY_COLORS = {
   'Electronics':    '#3b82f6',
-  'Clothing':       '#10b981',
+  'Clothing':       '#6366f1',
   'Home & Kitchen': '#f59e0b',
   'Books':          '#8b5cf6',
   'Sports':         '#06b6d4',

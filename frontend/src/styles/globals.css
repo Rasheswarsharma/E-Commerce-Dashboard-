@@ -230,3 +230,39 @@
   .card, .kpi-card, .btn-primary, .btn-secondary, body { transition: none !important; animation: none !important; }
   .ui-ripple { display: none !important }
 }
+
+/* Custom overrides for Profit and Loss indicators (Indigo for positive, Orange/Terracotta for negative) */
+.text-emerald-500, .text-emerald-600, .text-emerald-700, .text-green-600 {
+  color: #6366f1 !important; /* Electric Indigo for Profit/Positive */
+}
+.dark .text-emerald-500, .dark .text-emerald-600, .dark .text-emerald-700, .dark .text-green-600, .dark .text-emerald-400 {
+  color: #818cf8 !important; /* Luminous Indigo for Profit/Positive in Dark Mode */
+}
+.bg-emerald-50, .bg-emerald-100, .bg-green-50, .bg-green-100 {
+  background-color: rgba(99, 102, 241, 0.08) !important;
+}
+.dark .bg-emerald-900\/20, .dark .bg-emerald-900\/10 {
+  background-color: rgba(129, 140, 248, 0.12) !important;
+}
+.border-emerald-200 {
+  border-color: rgba(99, 102, 241, 0.25) !important;
+}
+
+.text-red-500, .text-red-600, .text-red-700, .text-rose-700, .text-rose-600 {
+  color: #f97316 !important; /* Terracotta Orange for Loss/Negative */
+}
+.dark .text-red-500, .dark .text-red-600, .dark .text-red-700, .dark .text-rose-700, .dark .text-red-400, .dark .text-rose-400 {
+  color: #fb923c !important; /* Soft Luminous Orange for Loss/Negative in Dark Mode */
+}
+.bg-red-50, .bg-red-100, .bg-rose-50, .bg-rose-100 {
+  background-color: rgba(249, 115, 22, 0.08) !important;
+}
+.dark .bg-red-900\/20, .dark .bg-red-900\/10, .dark .bg-rose-900\/20 {
+  background-color: rgba(251, 146, 60, 0.12) !important;
+}
+.border-red-200, .border-rose-200 {
+  border-color: rgba(249, 115, 22, 0.25) !important;
+}
+.bg-red-500, .bg-red-600, .bg-rose-500, .bg-rose-600 {
+  background-color: #ea580c !important;
+}

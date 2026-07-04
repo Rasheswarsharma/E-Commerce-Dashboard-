@@ -178,8 +178,8 @@ export function ProfitTrendChart({ data = [], height = 260 }) {
           labelFormatter={formatXDate}
         />
         <Legend />
-        <Bar yAxisId="left" dataKey="profit"  fill="#10b981" radius={[3, 3, 0, 0]} name="Profit" maxBarSize={30} />
-        <Bar yAxisId="left" dataKey="cost"    fill="#ef4444" radius={[3, 3, 0, 0]} name="Cost"   maxBarSize={30} />
+        <Bar yAxisId="left" dataKey="profit"  fill="#6366f1" radius={[3, 3, 0, 0]} name="Profit" maxBarSize={30} />
+        <Bar yAxisId="left" dataKey="cost"    fill="#f97316" radius={[3, 3, 0, 0]} name="Cost"   maxBarSize={30} />
         <Line yAxisId="right" type="monotone" dataKey="profit_margin" stroke="#f59e0b" strokeWidth={2} dot={false} name="Profit Margin" />
       </ComposedChart>
     </ResponsiveContainer>
