@@ -30,14 +30,6 @@ export default function initUI() {
     }
   })
 
-  // notification bell click
-  const bell = document.querySelector('.notification-btn')
-  if (bell) {
-    bell.addEventListener('click', () => {
-      toast.dismiss()
-      toast('No new notifications', { icon: '🔔' })
-    })
-  }
 
   // animate KPI counters when they enter viewport
   const counters = Array.from(document.querySelectorAll('[data-count]'))
