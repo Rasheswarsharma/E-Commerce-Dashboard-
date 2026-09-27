@@ -256,7 +256,7 @@ def list_batches():
     per_page = request.args.get("per_page", 10, type=int)
 
     uid = get_jwt_identity()
-    q = UploadBatch.query.filter_by(uploaded_by=uid).order_by(UploadBatch.created_at.desc())
+    q = UploadBatch.query.filter_by(uploaded_by=int(uid)).order_by(UploadBatch.created_at.desc())
     total = q.count()
     batches = q.offset((page - 1) * per_page).limit(per_page).all()
 
@@ -291,7 +291,7 @@ def dashboard():
         return error("No active dataset selected. Please upload or select a dataset.", 400)
     
     from models.models import UploadBatch
-    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=int(uid)).first():
         return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
@@ -339,7 +339,7 @@ def sales():
         return error("No active dataset selected. Please upload or select a dataset.", 400)
     
     from models.models import UploadBatch
-    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=int(uid)).first():
         return error("Dataset not found or access denied", 403)
     period = request.args.get("period", "monthly")
     start_date = request.args.get("start_date")
@@ -372,7 +372,7 @@ def products():
         return error("No active dataset selected. Please upload or select a dataset.", 400)
     
     from models.models import UploadBatch
-    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=int(uid)).first():
         return error("Dataset not found or access denied", 403)
     limit = request.args.get("limit", 10, type=int)
     sort_by = request.args.get("sort_by", "revenue")
@@ -404,7 +404,7 @@ def customers():
         return error("No active dataset selected. Please upload or select a dataset.", 400)
     
     from models.models import UploadBatch
-    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=int(uid)).first():
         return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
@@ -434,7 +434,7 @@ def profit():
         return error("No active dataset selected. Please upload or select a dataset.", 400)
     
     from models.models import UploadBatch
-    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=int(uid)).first():
         return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
@@ -464,7 +464,7 @@ def regions():
         return error("No active dataset selected. Please upload or select a dataset.", 400)
     
     from models.models import UploadBatch
-    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=int(uid)).first():
         return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
@@ -494,7 +494,7 @@ def forecast():
         return error("No active dataset selected. Please upload or select a dataset.", 400)
     
     from models.models import UploadBatch
-    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=int(uid)).first():
         return error("Dataset not found or access denied", 403)
     days = request.args.get("days", 30, type=int)
 
@@ -526,7 +526,7 @@ def download_excel():
         return error("No active dataset selected. Please upload or select a dataset.", 400)
     
     from models.models import UploadBatch
-    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=int(uid)).first():
         return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
@@ -574,7 +574,7 @@ def download_pdf():
         return error("No active dataset selected. Please upload or select a dataset.", 400)
     
     from models.models import UploadBatch
-    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=int(uid)).first():
         return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
@@ -633,7 +633,7 @@ def get_filters():
         return error("No active dataset selected. Please upload or select a dataset.", 400)
     
     from models.models import UploadBatch
-    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=int(uid)).first():
         return error("Dataset not found or access denied", 403)
     try:
         return success(get_filter_options(user_id=uid, batch_id=batch_id))

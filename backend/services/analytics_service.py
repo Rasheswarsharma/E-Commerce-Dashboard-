@@ -641,7 +641,10 @@ def get_filter_options(user_id=None, batch_id=None) -> Dict:
     cat_df = _query_df(cat_sql)
     reg_df = _query_df(reg_sql)
 
-    if user_id is not None:
+    if batch_id:
+        date_sql = "SELECT MIN(order_date) as min_d, MAX(order_date) as max_d FROM orders WHERE upload_batch = :batch_id AND upload_batch IN (SELECT batch_id FROM upload_batches WHERE uploaded_by = :user_id)"
+        date_df = _query_df(date_sql, {"batch_id": batch_id, "user_id": int(user_id) if user_id else 0})
+    elif user_id is not None:
         date_sql = "SELECT MIN(order_date) as min_d, MAX(order_date) as max_d FROM orders WHERE upload_batch IN (SELECT batch_id FROM upload_batches WHERE uploaded_by = :user_id)"
         date_df = _query_df(date_sql, {"user_id": int(user_id)})
     else:
