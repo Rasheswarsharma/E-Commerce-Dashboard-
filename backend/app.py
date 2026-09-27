@@ -59,10 +59,10 @@ def create_app(db_url: str = None) -> Flask:
     db.init_app(app)
     jwt.init_app(app)
 
-    origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:5173").split(",")
-    CORS(app,
-         resources={r"/api/*": {"origins": origins}},
-         supports_credentials=True)
+    origins = os.getenv("CORS_ORIGINS", "*")
+    if origins != "*":
+        origins = origins.split(",")
+    CORS(app, resources={r"/api/*": {"origins": origins}})
 
     # ── JWT error handlers ────────────────────────────────────
     @jwt.expired_token_loader
