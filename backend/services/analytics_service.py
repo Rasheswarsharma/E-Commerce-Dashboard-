@@ -30,10 +30,10 @@ def _date_trunc(expr: str, period: str) -> str:
         }
     else:
         fmt_map = {
-            "daily": f"DATE({expr})",
-            "weekly": f"DATE(DATE_SUB({expr}, INTERVAL WEEKDAY({expr}) DAY))",
-            "monthly": f"DATE_FORMAT({expr}, '%%Y-%%m-01')",
-            "yearly": f"DATE_FORMAT({expr}, '%%Y-01-01')",
+            "daily": f"CAST({expr} AS date)",
+            "weekly": f"DATE_TRUNC('week', CAST({expr} AS timestamp))::date",
+            "monthly": f"DATE_TRUNC('month', CAST({expr} AS timestamp))::date",
+            "yearly": f"DATE_TRUNC('year', CAST({expr} AS timestamp))::date",
         }
     return fmt_map.get(period, fmt_map["monthly"])
 
@@ -41,7 +41,7 @@ def _date_trunc(expr: str, period: str) -> str:
 def _group_by_month(expr: str) -> str:
     if _is_sqlite():
         return f"STRFTIME('%Y-%m-01', {expr})"
-    return f"DATE_FORMAT({expr}, '%%Y-%%m-01')"
+    return f"DATE_TRUNC('month', CAST({expr} AS timestamp))::date"
 
 def _query_df(sql: str, params: dict = None) -> pd.DataFrame:
     """Run raw SQL and return a DataFrame."""
