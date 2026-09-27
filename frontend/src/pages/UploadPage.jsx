@@ -3,26 +3,16 @@ import { Upload, FileText, CheckCircle, XCircle, AlertCircle, Loader2, Clock } f
 import { uploadAPI } from '../services/api'
 import { PageHeader, DataTable } from '../components/dashboard/UI'
 import toast from 'react-hot-toast'
+import { useDataset } from '../store/DatasetContext'
 
 export default function UploadPage() {
+  const { batches, loading: batchLoading, activeBatchId, setActiveBatchId, refreshBatches } = useDataset()
   const [file, setFile]       = useState(null)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress]   = useState(0)
   const [result, setResult]   = useState(null)
-  const [batches, setBatches] = useState([])
-  const [batchLoading, setBL] = useState(true)
   const inputRef = useRef()
   const dropRef  = useRef()
-
-  const loadBatches = () => {
-    setBL(true)
-    uploadAPI.getBatches({ per_page: 10 })
-      .then(r => setBatches(r.data.data?.batches || []))
-      .catch(() => {})
-      .finally(() => setBL(false))
-  }
-
-  useEffect(() => { loadBatches() }, [])
 
   const handleDrop = (e) => {
     e.preventDefault()
@@ -58,7 +48,7 @@ export default function UploadPage() {
       setProgress(100)
       setResult({ success: true, data: data.data })
       toast.success(`Imported ${data.data.import_result.imported} records!`)
-      loadBatches()
+      refreshBatches()
     } catch (err) {
       const msg = err.response?.data?.message || 'Upload failed'
       setResult({ success: false, error: msg })
@@ -70,6 +60,17 @@ export default function UploadPage() {
   }
 
   const batchCols = [
+    { key: 'active', label: '', render: (_, row) => (
+      <div className="flex justify-center w-12">
+        {row.batch_id === activeBatchId ? (
+          <span className="text-[10px] font-bold text-teal-700 bg-teal-100 dark:bg-teal-900/50 dark:text-teal-400 px-2 py-0.5 rounded-full select-none cursor-default">ACTIVE</span>
+        ) : (
+          row.status === 'completed' && (
+            <button onClick={() => setActiveBatchId(row.batch_id)} className="text-[10px] font-semibold text-slate-400 hover:text-teal-600 bg-slate-100 hover:bg-teal-50 dark:bg-slate-800 dark:hover:bg-teal-900/30 px-2 py-0.5 rounded-full transition-colors">SET ACTIVE</button>
+          )
+        )}
+      </div>
+    )},
     { key: 'file_name',     label: 'File' },
     { key: 'total_rows',    label: 'Total',    render: v => v?.toLocaleString(), align: 'right' },
     { key: 'imported_rows', label: 'Imported', render: v => <span className="text-emerald-600 font-medium">{v?.toLocaleString()}</span>, align: 'right' },

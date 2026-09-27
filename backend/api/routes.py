@@ -286,19 +286,26 @@ def dashboard():
     )
 
     uid = get_jwt_identity()
+    batch_id = request.args.get("batch_id")
+    if not batch_id:
+        return error("No active dataset selected. Please upload or select a dataset.", 400)
+    
+    from models.models import UploadBatch
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+        return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
     category = request.args.get("category")
     region = request.args.get("region")
 
     try:
-        kpis = get_kpis(start_date, end_date, category, region, user_id=uid)
-        sales_trend = get_sales_trend("monthly", start_date, end_date, category, region, user_id=uid)
-        product_data = get_product_analytics(10, "revenue", start_date, end_date, user_id=uid)
-        customer_data = get_customer_analytics(start_date, end_date, user_id=uid)
-        regional_data = get_regional_analytics(start_date, end_date, user_id=uid)
+        kpis = get_kpis(start_date, end_date, category, region, user_id=uid, batch_id=batch_id)
+        sales_trend = get_sales_trend("monthly", start_date, end_date, category, region, user_id=uid, batch_id=batch_id)
+        product_data = get_product_analytics(10, "revenue", start_date, end_date, user_id=uid, batch_id=batch_id)
+        customer_data = get_customer_analytics(start_date, end_date, user_id=uid, batch_id=batch_id)
+        regional_data = get_regional_analytics(start_date, end_date, user_id=uid, batch_id=batch_id)
         insights = generate_insights(kpis, sales_trend, product_data, regional_data)
-        filters = get_filter_options(user_id=uid)
+        filters = get_filter_options(user_id=uid, batch_id=batch_id)
 
         return success({
             "kpis": kpis,
@@ -327,6 +334,13 @@ def sales():
     from services.analytics_service import get_sales_trend
 
     uid = get_jwt_identity()
+    batch_id = request.args.get("batch_id")
+    if not batch_id:
+        return error("No active dataset selected. Please upload or select a dataset.", 400)
+    
+    from models.models import UploadBatch
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+        return error("Dataset not found or access denied", 403)
     period = request.args.get("period", "monthly")
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
@@ -334,7 +348,7 @@ def sales():
     region = request.args.get("region")
 
     try:
-        trend = get_sales_trend(period, start_date, end_date, category, region, user_id=uid)
+        trend = get_sales_trend(period, start_date, end_date, category, region, user_id=uid, batch_id=batch_id)
         return success(trend)
     except Exception as e:
         return error(str(e), 500)
@@ -353,13 +367,20 @@ def products():
     from services.analytics_service import get_product_analytics
 
     uid = get_jwt_identity()
+    batch_id = request.args.get("batch_id")
+    if not batch_id:
+        return error("No active dataset selected. Please upload or select a dataset.", 400)
+    
+    from models.models import UploadBatch
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+        return error("Dataset not found or access denied", 403)
     limit = request.args.get("limit", 10, type=int)
     sort_by = request.args.get("sort_by", "revenue")
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
     try:
-        data = get_product_analytics(limit, sort_by, start_date, end_date, user_id=uid)
+        data = get_product_analytics(limit, sort_by, start_date, end_date, user_id=uid, batch_id=batch_id)
         return success(data)
     except Exception as e:
         return error(str(e), 500)
@@ -378,11 +399,18 @@ def customers():
     from services.analytics_service import get_customer_analytics
 
     uid = get_jwt_identity()
+    batch_id = request.args.get("batch_id")
+    if not batch_id:
+        return error("No active dataset selected. Please upload or select a dataset.", 400)
+    
+    from models.models import UploadBatch
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+        return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
     try:
-        data = get_customer_analytics(start_date, end_date, user_id=uid)
+        data = get_customer_analytics(start_date, end_date, user_id=uid, batch_id=batch_id)
         return success(data)
     except Exception as e:
         return error(str(e), 500)
@@ -401,11 +429,18 @@ def profit():
     from services.analytics_service import get_profit_analytics
 
     uid = get_jwt_identity()
+    batch_id = request.args.get("batch_id")
+    if not batch_id:
+        return error("No active dataset selected. Please upload or select a dataset.", 400)
+    
+    from models.models import UploadBatch
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+        return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
     try:
-        data = get_profit_analytics(start_date, end_date, user_id=uid)
+        data = get_profit_analytics(start_date, end_date, user_id=uid, batch_id=batch_id)
         return success(data)
     except Exception as e:
         return error(str(e), 500)
@@ -424,11 +459,18 @@ def regions():
     from services.analytics_service import get_regional_analytics
 
     uid = get_jwt_identity()
+    batch_id = request.args.get("batch_id")
+    if not batch_id:
+        return error("No active dataset selected. Please upload or select a dataset.", 400)
+    
+    from models.models import UploadBatch
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+        return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
     try:
-        data = get_regional_analytics(start_date, end_date, user_id=uid)
+        data = get_regional_analytics(start_date, end_date, user_id=uid, batch_id=batch_id)
         return success(data)
     except Exception as e:
         return error(str(e), 500)
@@ -447,10 +489,17 @@ def forecast():
     from services.analytics_service import get_forecast
 
     uid = get_jwt_identity()
+    batch_id = request.args.get("batch_id")
+    if not batch_id:
+        return error("No active dataset selected. Please upload or select a dataset.", 400)
+    
+    from models.models import UploadBatch
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+        return error("Dataset not found or access denied", 403)
     days = request.args.get("days", 30, type=int)
 
     try:
-        data = get_forecast(days, user_id=uid)
+        data = get_forecast(days, user_id=uid, batch_id=batch_id)
         return success(data)
     except Exception as e:
         return error(str(e), 500)
@@ -472,14 +521,21 @@ def download_excel():
     from services.report_service import generate_excel_report
 
     uid = get_jwt_identity()
+    batch_id = request.args.get("batch_id")
+    if not batch_id:
+        return error("No active dataset selected. Please upload or select a dataset.", 400)
+    
+    from models.models import UploadBatch
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+        return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
     try:
-        kpis = get_kpis(start_date, end_date, user_id=uid)
-        sales = get_sales_trend("monthly", start_date, end_date, user_id=uid)
-        products = get_product_analytics(20, "revenue", start_date, end_date, user_id=uid)
-        customers = get_customer_analytics(start_date, end_date, user_id=uid)
+        kpis = get_kpis(start_date, end_date, user_id=uid, batch_id=batch_id)
+        sales = get_sales_trend("monthly", start_date, end_date, user_id=uid, batch_id=batch_id)
+        products = get_product_analytics(20, "revenue", start_date, end_date, user_id=uid, batch_id=batch_id)
+        customers = get_customer_analytics(start_date, end_date, user_id=uid, batch_id=batch_id)
 
         excel_bytes = generate_excel_report(kpis, sales, products, customers)
 
@@ -513,14 +569,21 @@ def download_pdf():
     from services.report_service import generate_pdf_report
 
     uid = get_jwt_identity()
+    batch_id = request.args.get("batch_id")
+    if not batch_id:
+        return error("No active dataset selected. Please upload or select a dataset.", 400)
+    
+    from models.models import UploadBatch
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+        return error("Dataset not found or access denied", 403)
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
     try:
-        kpis = get_kpis(start_date, end_date, user_id=uid)
-        sales = get_sales_trend("monthly", start_date, end_date, user_id=uid)
-        products = get_product_analytics(10, "revenue", start_date, end_date, user_id=uid)
-        regional = get_regional_analytics(start_date, end_date, user_id=uid)
+        kpis = get_kpis(start_date, end_date, user_id=uid, batch_id=batch_id)
+        sales = get_sales_trend("monthly", start_date, end_date, user_id=uid, batch_id=batch_id)
+        products = get_product_analytics(10, "revenue", start_date, end_date, user_id=uid, batch_id=batch_id)
+        regional = get_regional_analytics(start_date, end_date, user_id=uid, batch_id=batch_id)
         insights = generate_insights(kpis, sales, products, regional)
 
         pdf_bytes = generate_pdf_report(kpis, sales, products, insights)
@@ -565,7 +628,14 @@ filters_bp = Blueprint("filters", __name__, url_prefix="/api/filters")
 def get_filters():
     from services.analytics_service import get_filter_options
     uid = get_jwt_identity()
+    batch_id = request.args.get("batch_id")
+    if not batch_id:
+        return error("No active dataset selected. Please upload or select a dataset.", 400)
+    
+    from models.models import UploadBatch
+    if not UploadBatch.query.filter_by(batch_id=batch_id, uploaded_by=uid).first():
+        return error("Dataset not found or access denied", 403)
     try:
-        return success(get_filter_options(user_id=uid))
+        return success(get_filter_options(user_id=uid, batch_id=batch_id))
     except Exception as e:
         return error(str(e), 500)

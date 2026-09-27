@@ -14,6 +14,18 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token')
     if (token) config.headers.Authorization = `Bearer ${token}`
+    
+    // Auto-inject batch_id for all analytics GET requests
+    const activeBatchId = localStorage.getItem('active_batch_id')
+    if (
+      activeBatchId && 
+      config.method === 'get' && 
+      !config.url.startsWith('/auth') && 
+      !config.url.startsWith('/upload')
+    ) {
+      config.params = { ...config.params, batch_id: activeBatchId }
+    }
+    
     return config
   },
   (error) => Promise.reject(error)

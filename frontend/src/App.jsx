@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { AuthProvider, useAuth }    from './store/AuthContext'
 import { ThemeProvider, useTheme }  from './store/ThemeContext'
+import { DatasetProvider }          from './store/DatasetContext'
 import DashboardLayout              from './components/layout/DashboardLayout'
 import { LoginPage, RegisterPage }  from './components/auth/AuthPages'
 import OverviewPage                 from './pages/OverviewPage'
@@ -123,7 +124,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AppRoutes />
+        <DatasetProvider>
+          <AppRoutes />
+        </DatasetProvider>
       </AuthProvider>
     </ThemeProvider>
   )

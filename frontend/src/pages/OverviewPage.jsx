@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import {
   DollarSign, ShoppingCart, Users, TrendingUp,
-  BarChart2, Percent, AlertCircle, Star, MapPin, Package
+  BarChart2, Percent, AlertCircle, Star, MapPin, Package, Database
 } from 'lucide-react'
 import { dashboardAPI, filtersAPI } from '../services/api'
 import { KPICard, ChartCard, FilterBar, ErrorState, SectionHeader } from '../components/dashboard/UI'
 import { RevenueTrendChart, DonutChart, OrdersBarChart, CategoryBarChart } from '../components/charts/Charts'
 import { useFilters } from '../hooks/useFetch'
+import { useDataset } from '../store/DatasetContext'
 import { fmt } from '../utils/helpers'
 
 const INSIGHT_ICONS = {
@@ -27,6 +28,7 @@ const INSIGHT_COLORS = {
 }
 
 export default function OverviewPage() {
+  const { activeBatch } = useDataset()
   const { filters, params, update } = useFilters()
   const [data, setData]         = useState(null)
   const [filterOptions, setFO]  = useState(null)
@@ -64,15 +66,25 @@ export default function OverviewPage() {
       {/* Page header */}
       <div className="page-header">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Dashboard Overview</h1>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+            Dashboard Overview {activeBatch ? `— ${activeBatch.file_name}` : ''}
+          </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            {filterOptions?.date_range?.min && `Data from ${filterOptions.date_range.min} to ${filterOptions.date_range.max}`}
+            {activeBatch 
+              ? (filterOptions?.date_range?.min && `Data from ${filterOptions.date_range.min} to ${filterOptions.date_range.max}`) 
+              : 'No dataset uploaded yet'}
           </p>
         </div>
       </div>
 
-      {/* Filters */}
-      <FilterBar filters={filters} update={update} filterOptions={filterOptions} />
+      {!activeBatch ? (
+        <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+          <p className="text-lg text-slate-500 dark:text-slate-400">Please upload a dataset to view analytics.</p>
+        </div>
+      ) : (
+        <>
+          {/* Filters */}
+          <FilterBar filters={filters} update={update} filterOptions={filterOptions} />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
@@ -181,6 +193,8 @@ export default function OverviewPage() {
             ))}
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   )

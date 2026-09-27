@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-import { Menu, Bell, Search, ChevronUp, CheckCircle2, Info } from 'lucide-react'
+import { Menu, Bell, Search, ChevronUp, CheckCircle2, Info, Database } from 'lucide-react'
 import Sidebar from './Sidebar'
 import { cx } from '../../utils/helpers'
+import { useDataset } from '../../store/DatasetContext'
 
 export default function DashboardLayout() {
+  const { batches, completedBatches, activeBatchId, setActiveBatchId } = useDataset()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileSidebar, setMobileSidebar] = useState(false)
   const [time, setTime] = useState(new Date().toLocaleTimeString())
@@ -86,6 +88,32 @@ export default function DashboardLayout() {
           </div>
 
           <div className="ml-auto flex items-center gap-3">
+            {/* Dataset Selector */}
+            {completedBatches && completedBatches.length > 0 && (
+              <div className="hidden md:flex items-center gap-2 relative">
+                <Database className="w-4 h-4 text-slate-400 absolute left-2 pointer-events-none" />
+                <select
+                  value={activeBatchId || ''}
+                  onChange={(e) => {
+                    setActiveBatchId(e.target.value)
+                    window.location.reload()
+                  }}
+                  className="pl-8 pr-8 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-teal-600 outline-none max-w-[250px] appearance-none cursor-pointer"
+                  title="Select Active Dataset"
+                >
+                  <option value="" disabled>Select Dataset...</option>
+                  {completedBatches.map(b => (
+                    <option key={b.batch_id} value={b.batch_id}>
+                      {b.file_name} ({b.imported_rows} rows)
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute right-2 text-slate-400">
+                  <ChevronUp className="w-3 h-3 rotate-180" />
+                </div>
+              </div>
+            )}
+
             {/* Live Clock */}
             <span className="hidden md:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50 select-none">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

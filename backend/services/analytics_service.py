@@ -58,9 +58,9 @@ def _query_df(sql: str, params: dict = None) -> pd.DataFrame:
 # ──────────────────────────────────────────────────────────────
 
 def get_kpis(start_date: Optional[str] = None, end_date: Optional[str] = None,
-             category: Optional[str] = None, region: Optional[str] = None, user_id=None) -> Dict:
+             category: Optional[str] = None, region: Optional[str] = None, user_id=None, batch_id=None) -> Dict:
     """High-level KPI summary."""
-    filters, params = _build_filters(start_date, end_date, category, region, user_id=user_id)
+    filters, params = _build_filters(start_date, end_date, category, region, user_id=user_id, batch_id=batch_id)
     where = ("WHERE " + " AND ".join(filters)) if filters else ""
 
     sql = f"""
@@ -87,7 +87,7 @@ def get_kpis(start_date: Optional[str] = None, end_date: Optional[str] = None,
     profit_margin = (profit / revenue * 100) if revenue else 0
 
     # Previous period comparison
-    prev = _get_prev_period_revenue(start_date, end_date, category, region, user_id=user_id)
+    prev = _get_prev_period_revenue(start_date, end_date, category, region, user_id=user_id, batch_id=batch_id)
     rev_growth = ((revenue - prev) / prev * 100) if prev else 0
 
     return {
@@ -103,7 +103,7 @@ def get_kpis(start_date: Optional[str] = None, end_date: Optional[str] = None,
     }
 
 
-def _get_prev_period_revenue(start_date, end_date, category, region, user_id=None) -> float:
+def _get_prev_period_revenue(start_date, end_date, category, region, user_id=None, batch_id=None) -> float:
     if not start_date or not end_date:
         return 0
     try:
@@ -112,7 +112,7 @@ def _get_prev_period_revenue(start_date, end_date, category, region, user_id=Non
         delta = (e - s).days + 1
         prev_start = (s - timedelta(days=delta)).isoformat()
         prev_end = (s - timedelta(days=1)).isoformat()
-        filters, params = _build_filters(prev_start, prev_end, category, region, user_id=user_id)
+        filters, params = _build_filters(prev_start, prev_end, category, region, user_id=user_id, batch_id=batch_id)
         where = ("WHERE " + " AND ".join(filters)) if filters else ""
         sql = f"""
             SELECT COALESCE(SUM(o.revenue), 0) AS revenue
@@ -128,7 +128,7 @@ def _get_prev_period_revenue(start_date, end_date, category, region, user_id=Non
         return 0
 
 
-def _build_filters(start_date, end_date, category, region, prefix="o", user_id=None) -> tuple:
+def _build_filters(start_date, end_date, category, region, prefix="o", user_id=None, batch_id=None) -> tuple:
     filters = []
     params = {}
     if start_date:
@@ -143,7 +143,13 @@ def _build_filters(start_date, end_date, category, region, prefix="o", user_id=N
     if region:
         filters.append("r.name = :region")
         params["region"] = region
-    if user_id is not None:
+    if batch_id:
+        filters.append(f"{prefix}.upload_batch = :batch_id")
+        params["batch_id"] = batch_id
+        if user_id is not None:
+            filters.append("EXISTS (SELECT 1 FROM upload_batches WHERE batch_id = :batch_id AND uploaded_by = :user_id)")
+            params["user_id"] = int(user_id)
+    elif user_id is not None:
         filters.append(f"{prefix}.upload_batch IN (SELECT batch_id FROM upload_batches WHERE uploaded_by = :user_id)")
         params["user_id"] = int(user_id)
     return filters, params
@@ -155,8 +161,8 @@ def _build_filters(start_date, end_date, category, region, prefix="o", user_id=N
 
 def get_sales_trend(period: str = "monthly", start_date: str = None,
                     end_date: str = None, category: str = None,
-                    region: str = None, user_id=None) -> List[Dict]:
-    filters, params = _build_filters(start_date, end_date, category, region, user_id=user_id)
+                    region: str = None, user_id=None, batch_id=None) -> List[Dict]:
+    filters, params = _build_filters(start_date, end_date, category, region, user_id=user_id, batch_id=batch_id)
     where = ("WHERE " + " AND ".join(filters)) if filters else ""
 
     period_map = {
@@ -195,8 +201,8 @@ def get_sales_trend(period: str = "monthly", start_date: str = None,
 # ──────────────────────────────────────────────────────────────
 
 def get_product_analytics(limit: int = 10, sort_by: str = "revenue",
-                          start_date: str = None, end_date: str = None, user_id=None) -> Dict:
-    filters, params = _build_filters(start_date, end_date, None, None, user_id=user_id)
+                          start_date: str = None, end_date: str = None, user_id=None, batch_id=None) -> Dict:
+    filters, params = _build_filters(start_date, end_date, None, None, user_id=user_id, batch_id=batch_id)
     where = ("WHERE " + " AND ".join(filters)) if filters else ""
 
     sql = f"""
@@ -253,8 +259,8 @@ def get_product_analytics(limit: int = 10, sort_by: str = "revenue",
 # CUSTOMER ANALYTICS
 # ──────────────────────────────────────────────────────────────
 
-def get_customer_analytics(start_date: str = None, end_date: str = None, user_id=None) -> Dict:
-    filters, params = _build_filters(start_date, end_date, None, None, user_id=user_id)
+def get_customer_analytics(start_date: str = None, end_date: str = None, user_id=None, batch_id=None) -> Dict:
+    filters, params = _build_filters(start_date, end_date, None, None, user_id=user_id, batch_id=batch_id)
     where = ("WHERE " + " AND ".join(filters)) if filters else ""
 
     # Segment counts
@@ -334,8 +340,8 @@ def get_customer_analytics(start_date: str = None, end_date: str = None, user_id
 # REGIONAL ANALYTICS
 # ──────────────────────────────────────────────────────────────
 
-def get_regional_analytics(start_date: str = None, end_date: str = None, user_id=None) -> Dict:
-    filters, params = _build_filters(start_date, end_date, None, None, user_id=user_id)
+def get_regional_analytics(start_date: str = None, end_date: str = None, user_id=None, batch_id=None) -> Dict:
+    filters, params = _build_filters(start_date, end_date, None, None, user_id=user_id, batch_id=batch_id)
     where = ("WHERE " + " AND ".join(filters)) if filters else ""
 
     region_sql = f"""
@@ -401,8 +407,8 @@ def get_regional_analytics(start_date: str = None, end_date: str = None, user_id
 # PROFIT ANALYTICS
 # ──────────────────────────────────────────────────────────────
 
-def get_profit_analytics(start_date: str = None, end_date: str = None, user_id=None) -> Dict:
-    filters, params = _build_filters(start_date, end_date, None, None, user_id=user_id)
+def get_profit_analytics(start_date: str = None, end_date: str = None, user_id=None, batch_id=None) -> Dict:
+    filters, params = _build_filters(start_date, end_date, None, None, user_id=user_id, batch_id=batch_id)
     where = ("WHERE " + " AND ".join(filters)) if filters else ""
 
     monthly_sql = f"""
@@ -454,7 +460,7 @@ def get_profit_analytics(start_date: str = None, end_date: str = None, user_id=N
 # FORECASTING
 # ──────────────────────────────────────────────────────────────
 
-def get_forecast(days: int = 30, user_id=None) -> Dict:
+def get_forecast(days: int = 30, user_id=None, batch_id=None) -> Dict:
     """Linear regression + simple trend forecast for next N days."""
     try:
         from sklearn.linear_model import LinearRegression
@@ -629,7 +635,7 @@ def generate_insights(kpis: Dict, sales_trend: List, product_data: Dict,
 # FILTERS METADATA
 # ──────────────────────────────────────────────────────────────
 
-def get_filter_options(user_id=None) -> Dict:
+def get_filter_options(user_id=None, batch_id=None) -> Dict:
     cat_sql = "SELECT name FROM categories ORDER BY name"
     reg_sql = "SELECT name FROM regions ORDER BY name"
     cat_df = _query_df(cat_sql)
