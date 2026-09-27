@@ -202,14 +202,9 @@ def upload_file():
         return error("Only CSV, XLSX, and XLS files are supported")
 
     filename = secure_filename(file.filename)
-    upload_dir = current_app.config["UPLOAD_FOLDER"]
-    os.makedirs(upload_dir, exist_ok=True)
-
+    file_bytes = file.read()
+    file_size = len(file_bytes)
     batch_id = f"BATCH-{uuid.uuid4().hex[:12].upper()}"
-    save_path = os.path.join(upload_dir, f"{batch_id}_{filename}")
-    file.save(save_path)
-
-    file_size = os.path.getsize(save_path)
 
     batch = UploadBatch(
         batch_id=batch_id,
@@ -222,7 +217,7 @@ def upload_file():
     db.session.commit()
 
     try:
-        df = load_file(save_path)
+        df = load_file(file_bytes, filename)
         cleaned_df, clean_report = clean_dataframe(df)
 
         import_result = import_to_db(cleaned_df, batch_id, uid)
@@ -240,17 +235,9 @@ def upload_file():
         batch.status = "failed"
         batch.error_log = str(e)[:500]
         db.session.commit()
-        try:
-            os.remove(save_path)
-        except Exception:
-            pass
         return error(f"Processing failed: {str(e)}", 500)
 
     db.session.commit()
-    try:
-        os.remove(save_path)
-    except Exception:
-        pass
 
     return success({
         "batch": batch.to_dict(),

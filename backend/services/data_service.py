@@ -11,6 +11,7 @@ from typing import Dict, Tuple
 
 import pandas as pd
 import numpy as np
+import io
 
 logger = logging.getLogger(__name__)
 
@@ -146,19 +147,29 @@ def clean_dataframe(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
     return df, report
 
 
-def load_file(filepath: str) -> pd.DataFrame:
+def load_file(file_data, filename: str = None) -> pd.DataFrame:
     """Load CSV or Excel into a DataFrame."""
-    ext = filepath.rsplit(".", 1)[-1].lower()
+    if isinstance(file_data, str):
+        source = file_data
+        filename = file_data
+    else:
+        source = io.BytesIO(file_data)
+
+    ext = filename.rsplit(".", 1)[-1].lower()
     if ext == "csv":
         # Try multiple encodings
         for enc in ("utf-8", "latin-1", "cp1252"):
             try:
-                return pd.read_csv(filepath, encoding=enc)
+                if not isinstance(source, str):
+                    source.seek(0)
+                return pd.read_csv(source, encoding=enc)
             except UnicodeDecodeError:
                 continue
         raise ValueError("Could not decode CSV file")
     elif ext in ("xlsx", "xls"):
-        return pd.read_excel(filepath)
+        if not isinstance(source, str):
+            source.seek(0)
+        return pd.read_excel(source)
     else:
         raise ValueError(f"Unsupported file type: .{ext}")
 
